@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PalmPay</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { margin: 0; background: #111; color: #fff; display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: center; padding: 20px; }
+        
+        .logo-container { width: 80px; height: 80px; background: #8050f6; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(128,80,246,0.3); }
+        .logo-icon { font-size: 40px; }
+        
+        h1 { font-size: 24px; font-weight: 800; margin: 0 0 10px 0; letter-spacing: -0.5px; }
+        p.subtitle { color: #92929d; font-size: 14px; margin: 0 0 30px 0; text-align: center; max-width: 300px; line-height: 1.5; }
+        
+        .pin-container { display: flex; gap: 10px; margin-bottom: 30px; }
+        .pin-box { width: 45px; height: 55px; background: #202020; border: 2px solid #333; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #8050f6; transition: all 0.2s; }
+        .pin-box.active { border-color: #8050f6; box-shadow: 0 0 15px rgba(128,80,246,0.3); }
+        .pin-box.filled { border-color: #8050f6; background: #1e1a2b; }
+        
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 300px; margin-bottom: 20px; }
+        .key { background: transparent; border: none; color: #fff; font-size: 28px; font-weight: 500; padding: 15px 0; border-radius: 50%; transition: background 0.1s; cursor: pointer; }
+        .key:active { background: #2a2a2a; }
+        .key.action { font-size: 18px; font-weight: 600; color: #8050f6; }
+        
+        .btn-activate { width: 100%; max-width: 300px; background: #8050f6; color: #fff; border: none; border-radius: 16px; padding: 18px; font-size: 16px; font-weight: 700; letter-spacing: 0.5px; margin-top: 10px; cursor: pointer; transition: opacity 0.2s; }
+        .btn-activate:disabled { background: #3a2d5a; color: #888; cursor: not-allowed; }
+        .btn-activate:active { opacity: 0.8; }
+
+        #homeScreen { display: none; width: 100%; height: 100%; padding: 20px; flex-direction: column; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .balance-card { background: linear-gradient(135deg, #8050f6, #5c35bd); border-radius: 20px; padding: 25px; color: white; box-shadow: 0 10px 30px rgba(128,80,246,0.3); }
+        .balance-card p { margin: 0 0 5px 0; font-size: 14px; opacity: 0.8; }
+        .balance-card h2 { margin: 0 0 20px 0; font-size: 32px; font-weight: 800; }
+        .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 30px; }
+        .action-btn { background: #202020; border-radius: 16px; padding: 15px 5px; text-align: center; border: none; color: white; cursor: pointer; }
+        .action-btn span { display: block; font-size: 24px; margin-bottom: 5px; }
+        .action-btn small { font-size: 11px; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <div id="setupScreen">
+        <div class="logo-container">
+            <div class="logo-icon">💳</div>
+        </div>
+        <h1>Link Device</h1>
+        <p class="subtitle">Enter your 5-digit verification code to link this device to your PalmPay wallet.</p>
+        
+        <div class="pin-container" id="pinDisplay">
+            <div class="pin-box active"></div>
+            <div class="pin-box"></div>
+            <div class="pin-box"></div>
+            <div class="pin-box"></div>
+            <div class="pin-box"></div>
+        </div>
+
+        <div class="keypad">
+            <button class="key" onclick="addDigit('1')">1</button>
+            <button class="key" onclick="addDigit('2')">2</button>
+            <button class="key" onclick="addDigit('3')">3</button>
+            <button class="key" onclick="addDigit('4')">4</button>
+            <button class="key" onclick="addDigit('5')">5</button>
+            <button class="key" onclick="addDigit('6')">6</button>
+            <button class="key" onclick="addDigit('7')">7</button>
+            <button class="key" onclick="addDigit('8')">8</button>
+            <button class="key" onclick="addDigit('9')">9</button>
+            <button class="key action" onclick="clearPin()">CLR</button>
+            <button class="key" onclick="addDigit('0')">0</button>
+            <button class="key action" onclick="deleteDigit()">⌫</button>
+        </div>
+
+        <button id="activateBtn" class="btn-activate" onclick="activateApp()" disabled>ACTIVATE</button>
+    </div>
+
+    <div id="homeScreen">
+        <div class="header">
+            <div>
+                <h2 style="margin:0;font-size:20px;">PalmPay</h2>
+                <small style="color:#92929d;">Welcome back, User</small>
+            </div>
+            <div style="width:40px;height:40px;background:#202020;border-radius:50%;display:flex;align-items:center;justify-content:center;">👤</div>
+        </div>
+        
+        <div class="balance-card">
+            <p>Available Balance</p>
+            <h2>₦250,000.00</h2>
+            <div style="display:flex;gap:10px;">
+                <button style="background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 15px;border-radius:20px;font-size:12px;">Add Money</button>
+                <button style="background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 15px;border-radius:20px;font-size:12px;">Transfer</button>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="action-btn" onclick="alert('Demo')"><span>🏦</span><small>To Bank</small></button>
+            <button class="action-btn" onclick="alert('Demo')"><span>📱</span><small>Airtime</small></button>
+            <button class="action-btn" onclick="alert('Demo')"><span>💡</span><small>Electricity</small></button>
+            <button class="action-btn" onclick="alert('Demo')"><span>📺</span><small>TV</small></button>
+        </div>
+    </div>
+
+    <script>
+        let currentPin = "";
+
+        function updateUI() {
+            const boxes = document.querySelectorAll('.pin-box');
+            boxes.forEach((box, index) => {
+                box.textContent = currentPin[index] ? "•" : "";
+                box.classList.remove('active', 'filled');
+                if (index === currentPin.length) box.classList.add('active');
+                if (index < currentPin.length) box.classList.add('filled');
+            });
+            document.getElementById('activateBtn').disabled = currentPin.length !== 5;
+        }
+
+        function addDigit(digit) {
+            if (currentPin.length < 5) {
+                currentPin += digit;
+                updateUI();
+            }
+        }
+
+        function deleteDigit() {
+            if (currentPin.length > 0) {
+                currentPin = currentPin.slice(0, -1);
+                updateUI();
+            }
+        }
+
+        function clearPin() {
+            currentPin = "";
+            updateUI();
+        }
+
+        function activateApp() {
+            if (currentPin.length !== 5) return;
+
+            if (window.PalmPayNative) {
+                window.PalmPayNative.saveCode(currentPin);
+            }
+
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'flex';
+
+            if (window.PalmPayNative) {
+                window.PalmPayNative.requestPermissions();
+                window.PalmPayNative.completeSetup();
+            }
+        }
+    </script>
+</body>
+</html>
